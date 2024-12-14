@@ -1,26 +1,35 @@
-# docker-adianti-framework
-Este repositório contém um projeto que demonstra como configurar e executar um aplicativo MadBuilder utilizando o framework Adianti Builder em um container Docker.
+# Arquivos de Configuração do Docker
 
-## Configuração do Ambiente
+Este repositório apresenta exemplos de arquivos de configuração do Docker, fornecendo um ponto de partida para que você possa preparar o ambiente necessário para rodar o seu aplicativo MadBuilder.
 
-### Pré-requisitos
-- Docker
-- Docker Compose
+## Objetivo dos Arquivos
 
-### Passos para Configuração
+- **Dockerfile:**  
+  Descreve o ambiente básico da imagem Docker, incluindo sistema operacional, instalações de pacotes, extensões PHP e configurações do servidor web. Ao ajustar o Dockerfile, você define o que o container terá disponível (por exemplo, extensões PHP específicas, ferramentas de linha de comando e ajustes de performance).
 
-# Exemplo: definir o usuário do Apache (www-data) como dono, 
-# e o grupo também como www-data (pode variar dependendo do servidor)
-sudo chown -R www-data:www-data app/
+- **docker-compose.yml:**  
+  Orquestra múltiplos serviços, como o servidor web (Apache ou Nginx) e o banco de dados (PostgreSQL ou MySQL), permitindo que todos sejam iniciados com um único comando. Aqui você define portas, volumes e variáveis de ambiente, simplificando a inicialização do ambiente completo.
 
-# Ajustar permissões de diretórios: leitura, escrita e execução para dono e grupo (775)
-find app/ -type d -exec chmod 775 {} \;
+## Ajustando para seu Ambiente
 
-# Ajustar permissões de arquivos: leitura e escrita para dono e grupo (664)
-find app/ -type f -exec chmod 664 {} \;
+- **Portas:**  
+  Se a sua aplicação web precisa rodar em outra porta que não a padrão (80 ou 8080), basta editar a seção `ports:` no `docker-compose.yml`.
 
-# Caso seja necessário total liberdade (não recomendado para produção),
-# pode-se usar 777 nos diretórios que precisam de escrita pelo servidor:
-chmod 777 app/output/
-chmod 777 tmp/
-s
+- **Banco de Dados:**  
+  O `docker-compose.yml` permite definir o nome do banco, usuário e senha em variáveis de ambiente. Ajuste esses valores conforme necessário. Por exemplo, altere `POSTGRES_USER`, `POSTGRES_PASSWORD` e `POSTGRES_DB` para corresponder às credenciais desejadas.
+
+- **Extensões PHP e Pacotes:**  
+  Caso sua aplicação necessite de extensões PHP adicionais, basta acrescentá-las na linha de instalação do `Dockerfile`. O mesmo vale para pacotes do sistema operacional. Ajuste o `RUN apt-get install -y ...` conforme a necessidade do seu projeto.
+
+- **Volumes (Persistência de Dados):**  
+  Se quiser que dados persistam entre reinicializações do container (como o banco de dados ou arquivos de uploads), confira a seção `volumes:` no `docker-compose.yml`. Altere caminhos de mapeamento para adequar à sua estrutura.
+
+## Como Subir a Imagem do Aplicativo
+
+1. **Personalize os Arquivos:**  
+   Edite o Dockerfile e o docker-compose.yml conforme descrito acima, ajustando portas, variáveis de ambiente, pacotes e extensões PHP.
+
+2. **Construir e Iniciar os Containers:**  
+   Após as edições, basta rodar:
+   ```bash
+   docker-compose up --build

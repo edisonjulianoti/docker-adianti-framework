@@ -1,5 +1,6 @@
 FROM php:7.4-apache
 
+# Instala dependências e extensões PHP
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
@@ -12,13 +13,40 @@ RUN apt-get update && apt-get install -y \
     git \
     vim \
     curl \
+    openssh-server \
+    wget \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pgsql pdo pdo_pgsql mbstring zip
+    && docker-php-ext-install gd pgsql pdo pdo_pgsql mbstring zip \
+    && rm -rf /var/lib/apt/lists/*
 
+# Copia o php.ini customizado (ajuste se necessário)
 COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 
+# Habilita o rewrite do Apache
 RUN a2enmod rewrite
+
+# Configurações do SSH
+# - Define senha simples temporariamente: "teste123" (mude para algo mais seguro!)
+# - Permite login de root por senha
+# - Habilita PasswordAuthentication
+# - Define UsePAM yes
+RUN mkdir /var/run/sshd && \
+    echo 'root:senha123' | chpasswd && \
+    sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    echo 'UsePAM yes' >> /etc/ssh/sshd_config
 
 WORKDIR /var/www/html
 
-EXPOSE 80
+# Instala o ngrok (ajuste a versão conforme necessário)
+ENV NGROK_VERSION=3.3.0
+RUN curl -sSLo ngrok.zip "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v${NGROK_VERSION}-linux-amd64.zip" \
+    && unzip ngrok.zip -d /usr/local/bin \
+    && rm ngrok.zip \
+    && chmod +x /usr/local/bin/ngrok
+
+# Expor portas HTTP e SSH
+EXPOSE 80 22
+
+# Inicia o SSH em background e depois o apache no foreground
+CMD service ssh start && apache2-foreground

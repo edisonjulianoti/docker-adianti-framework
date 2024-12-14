@@ -5,25 +5,29 @@ services:
     build:
       context: ./docker
       dockerfile: Dockerfile.web
-    container_name: clinic_web
+    container_name: app_web
+    # Montar código fonte local para desenvolvimento:
     volumes:
       - ./app:/var/www/html
     ports:
       - "8030:80"
+      - "8022:22"
     depends_on:
       - db
     environment:
+      # Variáveis de ambiente do PHP, se necessário
+      # por exemplo: PHP_ENV=production
       PHP_ENV: development
 
   db:
     build:
       context: ./docker
       dockerfile: Dockerfile.db
-    container_name: app_db
+    container_name: bd
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: passwd
-      POSTGRES_DB: app
+      POSTGRES_PASSWORD: user@123
+      POSTGRES_DB: bd
     volumes:
       - db_data:/var/lib/postgresql/data
 
