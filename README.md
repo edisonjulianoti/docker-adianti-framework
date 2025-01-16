@@ -33,3 +33,8 @@ Este repositório apresenta exemplos de arquivos de configuração do Docker, fo
    Após as edições, basta rodar:
    ```bash
    docker-compose up --build
+
+
+#Tunnel
+ngrok authtoken SEU_AUTHTOKEN_AQUI
+ngrok tcp 22
